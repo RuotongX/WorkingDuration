@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">WorkingDuration</string>
+    <string name="title_home">Home</string>
+    <string name="title_statistics">Statistics</string>
+    <string name="empty_button"> </string>
+    <string name="title_notification">Notifications</string>
+</resources>
