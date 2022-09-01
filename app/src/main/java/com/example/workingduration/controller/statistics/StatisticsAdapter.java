@@ -1,8 +1,12 @@
 package com.example.workingduration.controller.statistics;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,10 +22,12 @@ import java.util.ArrayList;
 public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.MyViewHolder> {
     private ArrayList<WorkingHour> hourList;
     private final RealmManager rm;
+    private recyclerCallback rcallback;
 
-    public StatisticsAdapter(){
+    public StatisticsAdapter(recyclerCallback c){
         rm = new RealmManager();
         hourList = rm.selectFromDB();
+        this.rcallback = c;
     }
     public class MyViewHolder extends RecyclerView.ViewHolder {
         private TextView date_tv;
@@ -31,6 +37,46 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.My
             super(view);
             date_tv = view.findViewById(R.id.recycler_date);
             hour_tv = view.findViewById(R.id.recycler_hour);
+            itemView.setOnClickListener(v -> {
+                AlertDialog.Builder alert = new AlertDialog.Builder(view.getContext());
+                alert.setTitle("Please input the working hour");
+
+// Set an EditText view to get user input
+                final EditText input = new EditText(view.getContext());
+                alert.setView(input);
+
+                alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        String value = input.getText().toString();
+                        hour_tv.setText(value+" Hours");
+                        WorkingHour wh = new WorkingHour();
+                        wh.setDate((String)date_tv.getText());
+                        wh.setDuration(Double.parseDouble(value));
+                        rm.updateDB(wh);
+                        rcallback.refresh();
+                        return;
+                    }
+                });
+
+                alert.setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                // TODO Auto-generated method stub
+                                return;
+                            }
+                        });
+                alert.setNeutralButton("Delete",new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        WorkingHour wh = new WorkingHour();
+                        wh.setDate((String)date_tv.getText());
+                        rm.deleteHourFromDB(wh);
+                        hourList.remove(getAdapterPosition());
+                        rcallback.refresh();
+                        return;
+                    }
+                });
+                alert.show();
+            });
         }
     }
 

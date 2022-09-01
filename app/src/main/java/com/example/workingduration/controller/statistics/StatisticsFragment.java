@@ -3,14 +3,15 @@ package com.example.workingduration.controller.statistics;
 import static io.realm.internal.SyncObjectServerFacade.getApplicationContext;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.graphics.Typeface;
-import android.location.GnssAntennaInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -24,13 +25,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.workingduration.databinding.FragmentStatisticsBinding;
 import com.example.workingduration.R;
 import com.example.workingduration.model.RealmManager;
+import com.example.workingduration.model.WorkingHour;
 
-public class StatisticsFragment extends Fragment {
+import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.util.ArrayList;
+
+public class StatisticsFragment extends Fragment implements recyclerCallback {
 
     private FragmentStatisticsBinding binding;
     private RealmManager rm;
-
-
+    private RecyclerView recyclerView;
+    private TextView textView;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -43,12 +49,42 @@ public class StatisticsFragment extends Fragment {
 
         final ImageButton add_bt = binding.addButton;
         final ImageButton delete_bt = binding.deleteButton;
-        final RecyclerView recyclerView = binding.recyclerView;
-        final TextView textView = binding.totalHour;
+        recyclerView = binding.recyclerView;
+        textView = binding.totalHour;
         statisticsViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
         textView.setTypeface(Typeface.createFromAsset(getContext().getAssets(), "fonts/FOT-MatissePro-EB.otf"));
-        setAdapter(recyclerView);
-        delete_bt.setOnClickListener(v ->{
+        setAdapter();
+        add_bt.setOnClickListener(v -> {
+                    int mYear = LocalDate.now().getYear();
+                    int mMonth = LocalDate.now().getMonthValue();
+                    int mDay = LocalDate.now().getDayOfMonth();
+                    WorkingHour wh = new WorkingHour();
+                    wh.setDate("00-00");
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(),
+                            new DatePickerDialog.OnDateSetListener() {
+                                @Override
+                                public void onDateSet(DatePicker view, int year,
+                                                      int monthOfYear, int dayOfMonth) {
+                                    String month = String.format("%02d", monthOfYear+1);
+                                    String day = String.format("%02d", dayOfMonth);
+                                    Log.d("message", month+"-"+day);
+                                    wh.setDate(month + "-" + day);
+                                    wh.setDuration(0);
+                                    if(rm.contains(wh.getDate())||wh.getDate().equals("00-00")){
+
+                                    } else {
+                                        rm.saveDatabase(wh);
+                                        setAdapter();
+                                    }
+                                }
+                            }, mYear, mMonth-1, mDay);
+
+                    datePickerDialog.show();
+
+                }
+        );
+
+        delete_bt.setOnClickListener(v -> {
             AlertDialog ad = new AlertDialog.Builder(getContext())
                     .setTitle("Delete All")
                     .setMessage("Do you confirm to clear all logs")
@@ -58,10 +94,10 @@ public class StatisticsFragment extends Fragment {
                         public void onClick(DialogInterface dialogInterface, int i) {
                             rm.deleteAll();
                             textView.setText("0 Hours");
-                           setAdapter(recyclerView);
+                            setAdapter();
                         }
                     })
-                    .setNegativeButton("exit",null)
+                    .setNegativeButton("exit", null)
                     .create();
             ad.show();
         });
@@ -73,12 +109,23 @@ public class StatisticsFragment extends Fragment {
         super.onDestroyView();
         binding = null;
     }
-    private void setAdapter(RecyclerView recyclerView) {
-        StatisticsAdapter adapter = new StatisticsAdapter();
+
+    private void setAdapter() {
+        StatisticsAdapter adapter = new StatisticsAdapter(StatisticsFragment.this);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
+
+    }
+
+    @Override
+    public void refresh() {
+        ArrayList<WorkingHour> hourList = rm.selectFromDB();
+        double total = hourList.stream().mapToDouble(WorkingHour::getDuration).sum();
+        DecimalFormat df = new DecimalFormat("#.#");
+        textView.setText(df.format(total)+" Hours");
+        setAdapter();
 
     }
 }

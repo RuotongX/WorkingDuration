@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel;
 import com.example.workingduration.model.RealmManager;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class HomeViewModel extends ViewModel {
@@ -19,9 +20,16 @@ public class HomeViewModel extends ViewModel {
     public HomeViewModel() {
         mText = new MutableLiveData<>();
         LocalDate date = LocalDate.now();
+        LocalDate previous = date.minusDays(1);
         String result = date.format(DateTimeFormatter.ofPattern("MM-dd"));
+        String resultP = previous.format(DateTimeFormatter.ofPattern("MM-dd"));
+        LocalTime time = LocalTime.now();
+        LocalTime start = LocalTime.parse("09:00");
+
         if(rm.contains(result)){
             mText.setValue(rm.getOneDay(result));
+        } else if (rm.contains(resultP)&& time.isBefore(start)){
+            mText.setValue(rm.getOneDay(resultP));
         }
 
     }
