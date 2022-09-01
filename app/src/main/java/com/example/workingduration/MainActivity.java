@@ -13,6 +13,9 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.workingduration.databinding.ActivityMainBinding;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
@@ -20,6 +23,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Realm.init(this);
+        RealmConfiguration configuration = new RealmConfiguration.Builder().name("Realm.Database.Working").build();
+        Realm.setDefaultConfiguration(configuration);
+
         getSupportActionBar().hide();
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());

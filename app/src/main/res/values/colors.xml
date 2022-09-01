@@ -9,4 +9,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="maki">#713e3d</color>
     <color name="eva_red">#aa100f</color>
+    <color name="black_transparent">#17040101</color>
+    <color name="gray_background">#63FFFFFF</color>
+    <color name="black_background">#D9040101</color>
 </resources>
