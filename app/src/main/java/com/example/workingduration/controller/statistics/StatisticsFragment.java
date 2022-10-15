@@ -126,6 +126,5 @@ public class StatisticsFragment extends Fragment implements recyclerCallback {
         DecimalFormat df = new DecimalFormat("#.#");
         textView.setText(df.format(total)+" Hours");
         setAdapter();
-
     }
 }

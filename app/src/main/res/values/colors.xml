@@ -12,4 +12,5 @@
     <color name="black_transparent">#17040101</color>
     <color name="gray_background">#63FFFFFF</color>
     <color name="black_background">#D9040101</color>
+    <color name="gray">#8F8F8F</color>
 </resources>

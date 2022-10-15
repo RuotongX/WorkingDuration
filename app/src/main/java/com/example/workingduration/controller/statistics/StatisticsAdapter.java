@@ -35,6 +35,7 @@ public class StatisticsAdapter extends RecyclerView.Adapter<StatisticsAdapter.My
 
         public MyViewHolder(final View view) {
             super(view);
+
             date_tv = view.findViewById(R.id.recycler_date);
             hour_tv = view.findViewById(R.id.recycler_hour);
             itemView.setOnClickListener(v -> {
